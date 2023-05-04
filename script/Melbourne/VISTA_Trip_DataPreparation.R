@@ -99,12 +99,14 @@ rep_str = c('Vehicle Driver'='Vehicle Driver','Vehicle Passenger'='Vehicle Passe
 trips$mainmode <- str_replace_all(trips$combinedmode2, rep_str)
 trips$mainmode[trips$mainmode=="PT"] = "PT_walk_Bike"
 
-# mandatory data "home to work/education + work/education to home"
-mandatory_hwe<-subset(trips, trips$origplace1=="Accommodation"& trips$destpurp1=="Work Related" | trips$destpurp1=="Education")
-mandatory_weh<-subset(trips, trips$origplace1=="Workplace" | trips$origplace1=="Place of Education"& trips$destpurp1=="At or Go Home")
-mandatory_tot<-rbind(mandatory_hwe,mandatory_weh)
-trips<-mandatory_tot
-
+### creating binary variables for walking and cycling and mandatory trips
+trips$walking <- 0
+trips$walking[trips$mainmode == "Walking"] = 1
+trips$bicycle <- 0
+trips$bicycle[trips$mainmode == "Bicycle"] = 1
+trips$mandatory <- 0
+trips$mandatory[trips$destpurp1 =="Work Related" | trips$destpurp1 =="Education"] = 1                           
+                 
 #generaing age groups 
 trips$agegroup[trips$age<=14] = 1
 trips$agegroup[15<=trips$age & trips$age<=24] = 2
@@ -235,8 +237,6 @@ trips <- with(trips,trips[order(trips$logdist_walk_jibe,trips$logdist_bike_jibe)
 trips <- trips %>% rowwise() %>%
   mutate(weight_jibe = mean(c(logdist_walk_jibe, logdist_bike_jibe)))
 
-# mandatory tours
-
 #joining with gnaf point for area-based measures
 #orig long&lat of mandatory trips were joined to gnaf points using near analysis in qgis 
 #gnaf <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/Lucy/Data/ganf_points_selectedBEmeasures.csv",header=T, na.strings="N/A")
@@ -245,15 +245,11 @@ trips <- trips %>% rowwise() %>%
 #mandatory_gnaf <- rename(mandatory_gnaf, origdist_gnaf = HubDist)
 #trips_alljoined <-merge(mandatory_gnaf, gnaf, by="gnaf_pid")
 
-# filtering trips started from home
-#hb_trips <- mandatory_tours %>% 
-#  group_by(persid)
-#hb_trips <- hb_trips[hb_trips$tripno == 1 & hb_trips$origpurp1 == "At Home", ] 
-
-# filtering mandatory(work&education) trips 
-#mandatory_trips <- subset(hb_trips, trippurp=="Education"|trippurp=="Work Related")
-#mandatory_trips <- mandatory_trips %>%
-#  relocate(gnaf_pid, .before = origdist_gnaf)
+# mandatory data "home to work/education + work/education to home"
+mandatory_hwe<-subset(trips, trips$origplace1=="Accommodation"& trips$destpurp1=="Work Related" | trips$destpurp1=="Education")
+mandatory_weh<-subset(trips, trips$origplace1=="Workplace" | trips$origplace1=="Place of Education"& trips$destpurp1=="At or Go Home")
+mandatory_tot<-rbind(mandatory_hwe,mandatory_weh)
+trips<-mandatory_tot
 
 # exporting work and education trips to csv format
 write.csv(trips,file = "data/Melbourne/DOT_VISTA/processed/mandatory_trips.csv")
