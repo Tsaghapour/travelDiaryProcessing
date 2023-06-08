@@ -13,7 +13,7 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 # ################################################################# #
 
 #mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv")
+mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/LinkedBasedAttributes/LinkBased/TEST/mandatory_trips92.csv")
 database <- mandatory_trips
 
 #generating unique tripid
@@ -138,8 +138,8 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   # light_walk = s_light_walk * short_walk_lights; light_bike = s_light_bike * short_bike_lights 
   shannon_walk = s_shannon_walk *short_walk_shannon; shannon_bike = s_shannon_bike *short_bike_shannon 
   crime_walk = s_crime_walk *short_walk_crime; crime_bike = s_crime_bike *short_bike_crime 
-  streslnk_walk = s_streslnk_walk *short_walk_linkStress; streslnk_bike = s_streslnk_bike *short_bike_linkStress 
-  stresjct_walk = s_stresjct_walk *short_walk_jctStress; stresjct_bike = s_stresjct_bike *short_bike_jctStress
+  streslnk_walk = s_streslnk_walk *short_walk_stressLink; streslnk_bike = s_streslnk_bike *short_bike_stressLink 
+  stresjct_walk = s_stresjct_walk *short_walk_stressJct; stresjct_bike = s_stresjct_bike *short_bike_stressJct
   # poi_walk = s_poi_walk *short_walk_POIs; poi_bike = s_poi_bike *short_bike_POIs;
   # negpoi_walk = s_negpoi_walk *short_walk_negPOIs; negpoi_bike = s_negpoi_bike *short_bike_negPOIs
 
