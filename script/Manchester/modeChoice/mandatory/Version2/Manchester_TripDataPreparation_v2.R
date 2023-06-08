@@ -159,6 +159,14 @@ trips_hh_p$hh.structure2=="Two Adults Hoh or HRP 16 to 64"|trips_hh_p$hh.structu
 ## modifying route-based attributes (divided by distance to get the raw values) 
 ## row #105 to #206 were deleted from the old file due to not being applicable to the updated data
 
+# creating dummy variable for vgvi and light based on the day and night
+trips_hh_p <- trips_hh_p %>%
+       mutate(hours = t.departureTime %/% 3600)
+trips_hh_p$vgvi_day = 0
+trips_hh_p$vgvi_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 1
+trips_hh_p$light_day = 1
+trips_hh_p$light_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 0
+
 #generating mainmode 
 trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
 trips_hh_p$mainmode[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
