@@ -68,7 +68,7 @@ trips_distance <- trips_distance %>%
 
 ## adding short and fast to the columns name
 start_col <- 4
-end_col <- 24
+end_col <- 26
 colnames(trips_short)[start_col:end_col] <- paste("short_", colnames(trips_short)[start_col:end_col], sep = "")
 colnames(trips_fast)[start_col:end_col] <- paste("fast_", colnames(trips_fast)[start_col:end_col], sep = "")
 
@@ -164,8 +164,8 @@ trips_hh_p <- trips_hh_p %>%
        mutate(hours = t.departureTime %/% 3600)
 trips_hh_p$vgvi_day = 0
 trips_hh_p$vgvi_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 1
-trips_hh_p$light_day = 1
-trips_hh_p$light_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 0
+trips_hh_p$light_night = 1
+trips_hh_p$light_night[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 0
 
 #generating mainmode 
 trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
