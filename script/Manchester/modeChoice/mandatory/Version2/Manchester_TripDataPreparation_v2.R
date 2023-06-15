@@ -185,17 +185,6 @@ trips_hh_p$vgvi_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 1
 trips_hh_p$light_night = 1
 trips_hh_p$light_night[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 0
 
-#generating mainmode 
-trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
-trips_hh_p$mainmode[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
-trips_hh_p$mainmode[trips_hh_p$t.m_walk=="TRUE"] = 3
-trips_hh_p$mainmode[trips_hh_p$t.m_cycle=="TRUE"] = 4
-trips_hh_p$mainmode[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_metrolink=="TRUE"|trips_hh_p$t.m_bus=="TRUE"] = 5 
-trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
-trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
-
-#trips_hh_p$mainmode <- factor(trips_hh_p$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
-
 #generating availability of modes
 trips_hh_p$availcard <- 1
 trips_hh_p$availcard[trips_hh_p$t.route.car_time == 0] = 0
