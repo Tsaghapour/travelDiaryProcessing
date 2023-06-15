@@ -80,6 +80,24 @@ trips <- merge(trips, trips_distance, by=c("trip.id","hh.id","indiv.id"))
 oldtrips <- subset(oldtrips, select = -c(1:3))
 trips <- merge(trips, oldtrips, by="trip.id")
 
+#generating mainmode 
+
+trips$mainmode[trips$t.m_main=="Car or van driver"|trips$t.m_main=="Motorcycle, scooter, moped"] = 1 
+trips$mainmode[trips$t.m_main=="Car or van passenger"|trips$t.m_main=="Taxi, minicab"] = 2
+trips$mainmode[trips$t.m_main=="Walk"] = 3
+trips$mainmode[trips$t.m_main=="Bicycle"] = 4
+trips$mainmode[trips$t.m_main=="Train"|trips$t.m_main=="Metrolink"|trips$t.m_main=="Bus, minibus, coach"] = 5 
+trips <- trips[!(trips$t.m_main=="Other"),]
+trips <- trips[complete.cases(trips$mainmode), ]
+
+#trips$mainmode <- factor(trips$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
+
+### creating binary variables for walking and cycling 
+trips$walking <- 0
+trips$walking[trips$t.m_main=="Walk"] = 1
+trips$bicycle <- 0
+trips$bicycle[trips$t.m_main=="Bicycle"] = 1
+
 # deleting the old BE variables
 names(trips)[names(trips) == "t.route.pt_ptTravelTime"] <- "pt_ptTravelTime"
 names(trips)[names(trips) == "t.route.pt_totalTravelTime"] <- "pt_totalTravelTime"
