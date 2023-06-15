@@ -80,24 +80,6 @@ trips <- merge(trips, trips_distance, by=c("trip.id","hh.id","indiv.id"))
 oldtrips <- subset(oldtrips, select = -c(1:3))
 trips <- merge(trips, oldtrips, by="trip.id")
 
-#generating mainmode 
-
-trips$mainmode[trips$t.m_main=="Car or van driver"|trips$t.m_main=="Motorcycle, scooter, moped"] = 1 
-trips$mainmode[trips$t.m_main=="Car or van passenger"|trips$t.m_main=="Taxi, minicab"] = 2
-trips$mainmode[trips$t.m_main=="Walk"] = 3
-trips$mainmode[trips$t.m_main=="Bicycle"] = 4
-trips$mainmode[trips$t.m_main=="Train"|trips$t.m_main=="Metrolink"|trips$t.m_main=="Bus, minibus, coach"] = 5 
-trips <- trips[!(trips$t.m_main=="Other"),]
-trips <- trips[complete.cases(trips$mainmode), ]
-
-#trips$mainmode <- factor(trips$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
-
-### creating binary variables for walking and cycling 
-trips$walking <- 0
-trips$walking[trips$t.m_main=="Walk"] = 1
-trips$bicycle <- 0
-trips$bicycle[trips$t.m_main=="Bicycle"] = 1
-
 # deleting the old BE variables
 names(trips)[names(trips) == "t.route.pt_ptTravelTime"] <- "pt_ptTravelTime"
 names(trips)[names(trips) == "t.route.pt_totalTravelTime"] <- "pt_totalTravelTime"
@@ -209,6 +191,23 @@ trips_hh_p$bike_time[is.na(trips_hh_p$bike_time)] = 0
 trips_hh_p$walk_dist[is.na(trips_hh_p$walk_dist)] = 0
 trips_hh_p$bike_dist[is.na(trips_hh_p$bike_dist)] = 0
 trips_hh_p$pt_totalTravelTime[is.na(trips_hh_p$pt_totalTravelTime)] = 0
+
+#generating mainmode 
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Car or van driver"|trips_hh_p$t.m_main=="Motorcycle, scooter, moped"] = 1 
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Car or van passenger"|trips_hh_p$t.m_main=="Taxi, minicab"] = 2
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Walk"] = 3
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Bicycle"] = 4
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Train"|trips_hh_p$t.m_main=="Metrolink"|trips_hh_p$t.m_main=="Bus, minibus, coach"] = 5 
+trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
+trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
+
+#trips$mainmode <- factor(trips$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
+
+### creating binary variables for walking and cycling 
+trips_hh_p$walking <- 0
+trips_hh_p$walking[trips_hh_p$t.m_main=="Walk"] = 1
+trips_hh_p$bicycle <- 0
+trips_hh_p$bicycle[trips_hh_p$t.m_main=="Bicycle"] = 1
 
 # log transformation of distance variable 
 trips_hh_p$logwalkdist <- log(trips_hh_p$walk_dist)
