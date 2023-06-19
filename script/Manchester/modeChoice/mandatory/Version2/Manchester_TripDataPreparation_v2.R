@@ -193,11 +193,11 @@ trips_hh_p$bike_dist[is.na(trips_hh_p$bike_dist)] = 0
 trips_hh_p$pt_totalTravelTime[is.na(trips_hh_p$pt_totalTravelTime)] = 0
 
 #generating mainmode 
-trips_hh_p$mainmode[trips_hh_p$t.m_main=="Car or van driver"|trips_hh_p$t.m_main=="Motorcycle, scooter, moped"] = 1 
-trips_hh_p$mainmode[trips_hh_p$t.m_main=="Car or van passenger"|trips_hh_p$t.m_main=="Taxi, minicab"] = 2
-trips_hh_p$mainmode[trips_hh_p$t.m_main=="Walk"] = 3
-trips_hh_p$mainmode[trips_hh_p$t.m_main=="Bicycle"] = 4
-trips_hh_p$mainmode[trips_hh_p$t.m_main=="Train"|trips_hh_p$t.m_main=="Metrolink"|trips_hh_p$t.m_main=="Bus, minibus, coach"] = 5 
+trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
+trips_hh_p$mainmode[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
+trips_hh_p$mainmode[trips_hh_p$t.m_walk=="TRUE"] = 3
+trips_hh_p$mainmode[trips_hh_p$t.m_cycle=="TRUE"] = 4
+trips_hh_p$mainmode[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_bus=="TRUE"|trips_hh_p$t.m_metrolink=="TRUE"] = 5 
 trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
 trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
 
@@ -205,9 +205,9 @@ trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
 
 ### creating binary variables for walking and cycling 
 trips_hh_p$walking <- 0
-trips_hh_p$walking[trips_hh_p$t.m_main=="Walk"] = 1
+trips_hh_p$walking[trips_hh_p$mainmode == 3] = 1
 trips_hh_p$bicycle <- 0
-trips_hh_p$bicycle[trips_hh_p$t.m_main=="Bicycle"] = 1
+trips_hh_p$bicycle[trips_hh_p$mainmode == 4] = 1
 
 # log transformation of distance variable 
 trips_hh_p$logwalkdist <- log(trips_hh_p$walk_dist)
