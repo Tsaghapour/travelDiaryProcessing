@@ -11,13 +11,13 @@ suppressPackageStartupMessages(library(tidyverse))# for manipulating data
 suppressPackageStartupMessages(library(expss))# for manipulating data
 
 #reading files
-trads <- read_rds("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/TRADS_safe_routed_v2.rds")
+trads <- read_rds("data/manchester/TRADS_safe_routed_v2.rds")
 list2env(trads, globalenv())
 oldtrips <- trips
-trips_short <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/LinkedBasedAttributes/LinkBased/TEST/mandatoryShort92.csv", header = T)
-trips_fast <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/LinkedBasedAttributes/LinkBased/TEST/mandatoryfast92.csv", header = T)
-trips_time <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/routesFast.csv", header = T)
-trips_distance <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/routesShort.csv", header = T)
+trips_short <- read.csv("data/manchester/mandatoryShort92.csv", header = T)
+trips_fast <- read.csv("data/manchester/mandatoryfast92.csv", header = T)
+trips_time <- read.csv("data/manchester/routesFast.csv", header = T)
+trips_distance <- read.csv("data/manchester/routesShort.csv", header = T)
 
 ## renaming columns
 names(trips_short)[names(trips_short) == "IDNumber"] <- "hh.id"
@@ -225,6 +225,6 @@ trips_hh_p$logbikedist <- log(trips_hh_p$bike_dist)
 #extracting work and education trips
 #tripsWE<- subset(trips_hh_p, t.startPurpose=="Home"& t.endPurpose=="Usual place of work"|t.endPurpose=="Unpaid, voluntary work"|
 #t.endPurpose=="Education as pupil, student" | t.endPurpose== "Work - Business, other")
-#write_labelled_csv(tripsWE,file = "C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv",row.names=FALSE, single_file = TRUE)
-write.csv(trips_hh_p,file = "C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/LinkedBasedAttributes/LinkBased/TEST/mandatory_trips92.csv",row.names=FALSE)
+#write_labelled_csv(tripsWE,file = "data/manchester/mandatory_trips.csv",row.names=FALSE, single_file = TRUE)
+write.csv(trips_hh_p,file = "data/manchester/mandatory_trips92.csv",row.names=FALSE)
 
