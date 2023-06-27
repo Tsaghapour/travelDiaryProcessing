@@ -144,7 +144,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   # negpoi_walk = s_negpoi_walk *short_walk_negPOIs; negpoi_bike = s_negpoi_bike *short_bike_negPOIs
 
   ###traveltime
-  carptime = s_timecarp * car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * (pt_ptTravelTime +pt_walkTravelTime)
+  carptime = s_timecarp * car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * otptotalpt_time
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
@@ -237,5 +237,5 @@ estimateValues <- paste(round(modelsht_estimates,3),"[",round(modelsht_tTest,3),
 estimateValues[modelsht_estimates == 0] <- NA
 names(estimateValues) = names(apollo_beta)
 estimate_lambdas <- estimateValues[startsWith(names(apollo_beta),"lambda")]
-write.csv(estimateValues,file = "data/results/Manchester/mandatory/Version2estimatevalues_modelsht_s.csv")
+write.csv(estimateValues,file = "result/Manchester/mandatory/Version2/estimatevalues_modelsht_s.csv")
 

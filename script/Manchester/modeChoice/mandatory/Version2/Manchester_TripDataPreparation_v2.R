@@ -18,6 +18,7 @@ trips_short <- read.csv("data/manchester/mandatoryShort92.csv", header = T)
 trips_fast <- read.csv("data/manchester/mandatoryfast92.csv", header = T)
 trips_time <- read.csv("data/manchester/routesFast.csv", header = T)
 trips_distance <- read.csv("data/manchester/routesShort.csv", header = T)
+updatedpt <- read.csv("data/manchester/OtpPtDataManchester.csv", header = T)
 
 ## renaming columns
 names(trips_short)[names(trips_short) == "IDNumber"] <- "hh.id"
@@ -79,13 +80,18 @@ trips <- merge(trips, trips_time, by=c("trip.id","hh.id","indiv.id"))
 trips <- merge(trips, trips_distance, by=c("trip.id","hh.id","indiv.id"))
 oldtrips <- subset(oldtrips, select = -c(1:3))
 trips <- merge(trips, oldtrips, by="trip.id")
+trips <- merge(trips, updatedpt, by="trip.id")
 
 # deleting the old BE variables
-names(trips)[names(trips) == "t.route.pt_ptTravelTime"] <- "pt_ptTravelTime"
-names(trips)[names(trips) == "t.route.pt_totalTravelTime"] <- "pt_totalTravelTime"
-names(trips)[names(trips) == "t.route.pt_walkTravelTime"] <- "pt_walkTravelTime"
+names(trips)[names(trips) == "t.route.pt_ptTravelTime"] <- "oldpt_ptTravelTime"
+names(trips)[names(trips) == "t.route.pt_totalTravelTime"] <- "oldpt_totalTravelTime"
+names(trips)[names(trips) == "t.route.pt_walkTravelTime"] <- "oldpt_walkTravelTime"
+names(trips)[names(trips) == "t.route.car_time"] <- "troutecar_time"
+names(trips)[names(trips) == "t.route.walk_short_time"] <- "troutewalk_short_time"
+names(trips)[names(trips) == "t.route.bike_short_time"] <- "troutebike_short_time"
 cols_to_delete <- grep("t.route", names(trips), value = TRUE)
 trips <- trips[, !(names(trips) %in% cols_to_delete)]
+
 
 #merging trip data with household and person data
 trips_hh <- merge(trips,households, by="hh.id")
@@ -167,8 +173,18 @@ trips_hh_p$vgvi_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 1
 trips_hh_p$light_night = 1
 trips_hh_p$light_night[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 0
 
+#generating mainmode 
+trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
+trips_hh_p$mainmode[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
+trips_hh_p$mainmode[trips_hh_p$t.m_walk=="TRUE"] = 3
+trips_hh_p$mainmode[trips_hh_p$t.m_cycle=="TRUE"] = 4
+trips_hh_p$mainmode[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_bus=="TRUE"|trips_hh_p$t.m_metrolink=="TRUE"] = 5 
+trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
+trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
+
 #generating availability of modes
 trips_hh_p$availcard <- 1
+trips_hh_p$availcard[trips_hh_p$carsno == 0] = 0
 trips_hh_p$availcard[trips_hh_p$t.route.car_time == 0] = 0
 trips_hh_p$availcard[trips_hh_p$mainmode == 1] = 1
 trips_hh_p$availcarp <- 1
@@ -178,10 +194,11 @@ trips_hh_p$availwalk <- 1
 trips_hh_p$availwalk[trips_hh_p$troutewalk_short_time == 0] = 0
 trips_hh_p$availwalk[trips_hh_p$mainmode == 3] = 1
 trips_hh_p$availbike <- 1
+trips_hh_p$availbike[trips_hh_p$bikesno == 0] = 0
 trips_hh_p$availbike[trips_hh_p$troutebike_short_time == 0] = 0
 trips_hh_p$availbike[trips_hh_p$mainmode == 4] = 1
 trips_hh_p$availpt <- 1
-trips_hh_p$availpt[trips_hh_p$troutept_totaltraveltime == 0] = 0
+trips_hh_p$availpt[trips_hh_p$otptransit_time == 0] = 0
 trips_hh_p$availpt[trips_hh_p$mainmode == 5] = 1
 
 #replacing NAs in time and cost variables with 0
@@ -190,16 +207,7 @@ trips_hh_p$walk_time[is.na(trips_hh_p$walk_time)] = 0
 trips_hh_p$bike_time[is.na(trips_hh_p$bike_time)] = 0
 trips_hh_p$walk_dist[is.na(trips_hh_p$walk_dist)] = 0
 trips_hh_p$bike_dist[is.na(trips_hh_p$bike_dist)] = 0
-trips_hh_p$pt_totalTravelTime[is.na(trips_hh_p$pt_totalTravelTime)] = 0
-
-#generating mainmode 
-trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
-trips_hh_p$mainmode[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
-trips_hh_p$mainmode[trips_hh_p$t.m_walk=="TRUE"] = 3
-trips_hh_p$mainmode[trips_hh_p$t.m_cycle=="TRUE"] = 4
-trips_hh_p$mainmode[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_bus=="TRUE"|trips_hh_p$t.m_metrolink=="TRUE"] = 5 
-trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
-trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
+trips_hh_p$pt_totalTravelTime[is.na(trips_hh_p$otptotalpt_time)] = 0
 
 #trips$mainmode <- factor(trips$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
 
