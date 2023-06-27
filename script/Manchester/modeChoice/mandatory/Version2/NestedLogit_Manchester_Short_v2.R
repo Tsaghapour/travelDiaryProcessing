@@ -12,8 +12,8 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
 
-#mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/LinkedBasedAttributes/LinkBased/TEST/mandatory_trips92.csv")
+#mandatory_trips <- read.csv("data/manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
+mandatory_trips <- read.csv("data/manchester/mandatory_trips92.csv")
 database <- mandatory_trips
 
 #generating unique tripid
@@ -204,7 +204,7 @@ forecast = apollo_prediction(modelsht,
                                      apollo_probabilities,
                                      apollo_inputs)
                                       
-write.csv(forecast,file = "C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/forcast_modelsht.csv")
+write.csv(forecast,file = "data/manchester/forcast_modelsht.csv")
 
 #### Likelihood ratio tests against MNL model
 # ################################################################# #
@@ -237,5 +237,5 @@ estimateValues <- paste(round(modelsht_estimates,3),"[",round(modelsht_tTest,3),
 estimateValues[modelsht_estimates == 0] <- NA
 names(estimateValues) = names(apollo_beta)
 estimate_lambdas <- estimateValues[startsWith(names(apollo_beta),"lambda")]
-write.csv(estimateValues,file = "C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/estimatevalues_modelsht_s.csv")
+write.csv(estimateValues,file = "data/results/Manchester/mandatory/Version2estimatevalues_modelsht_s.csv")
 
