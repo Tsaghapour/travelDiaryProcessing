@@ -5,7 +5,7 @@ rm(list = ls())
 #rm(list= ls()[!(ls() %in% c('modelmnl','modelsht','modelsht2'))])
 
 ### Load Apollo library
-library(apollo)
+library(apollO)
 suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 
 # ################################################################# #
