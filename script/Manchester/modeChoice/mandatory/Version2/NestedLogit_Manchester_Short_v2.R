@@ -67,7 +67,7 @@ apollo_beta =c(cons_carp = 0, cons_walk = 0, cons_bike = 0, cons_ptwalk = 0,
                s_light_walk = 0, s_light_bike = 0, 
                s_shannon_walk = 0, s_shannon_bike = 0,  
                s_crime_walk = 0, s_crime_bike = 0, 
-               s_streslnk_walk = 0, s_streslnk_bike = 0,
+               s_streslnk_bike = 0, #s_streslnk_walk = 0,
                s_stresjct_walk = 0, #s_stresjct_bike = 0,
                #s_poi_walk = 0, s_poi_bike = 0, 
                #s_negpoi_walk = 0, s_negpoi_bike = 0, 
@@ -138,7 +138,8 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   light_walk = s_light_walk * short_walk_lights2*light_night; light_bike = s_light_bike * short_bike_lights2*light_night 
   shannon_walk = s_shannon_walk *short_walk_shannon; shannon_bike = s_shannon_bike *short_bike_shannon 
   crime_walk = s_crime_walk *short_walk_crime; crime_bike = s_crime_bike *short_bike_crime 
-  streslnk_walk = s_streslnk_walk *short_walk_stressLink; streslnk_bike = s_streslnk_bike *short_bike_stressLink 
+  # streslnk_walk = s_streslnk_walk *short_walk_stressLink; 
+  streslnk_bike = s_streslnk_bike *short_bike_stressLink 
   stresjct_walk = s_stresjct_walk *short_walk_stressJct; #stresjct_bike = s_stresjct_bike *short_bike_stressJct
   # poi_walk = s_poi_walk *short_walk_POIs; poi_bike = s_poi_bike *short_bike_POIs;
   # negpoi_walk = s_negpoi_walk *short_walk_negPOIs; negpoi_bike = s_negpoi_bike *short_bike_negPOIs
@@ -152,7 +153,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   V[['carp']]  = cons_carp + age2_carp + age4_carp + age5_carp + age6_carp + female_carp + inc1_carp + inc2_carp + inc3_carp + inc4_carp + inc6_carp+
     carsno_carp + bikesno_carp + worktype2_carp + worktype4_carp + carptime 
   V[['walk']]  = cons_walk + age2_walk + age4_walk + age5_walk + age6_walk + female_walk +inc1_walk + inc2_walk + inc3_walk + inc4_walk + inc6_walk +
-    carsno_walk + bikesno_walk + worktype2_walk + worktype4_walk + streslnk_walk + stresjct_walk + light_walk + vgvi_walk + shannon_walk + crime_walk + walkdist 
+    carsno_walk + bikesno_walk + worktype2_walk + worktype4_walk + stresjct_walk + light_walk + vgvi_walk + shannon_walk + crime_walk + walkdist 
   V[['bike']] = cons_bike + age2_bike + age4_bike + age5_bike + age6_bike + female_bike + inc1_bike + inc2_bike + inc3_bike + inc4_bike +inc6_bike +
     carsno_bike + bikesno_bike + worktype2_bike + worktype4_bike + streslnk_bike + light_bike + vgvi_bike + shannon_bike + crime_bike + bikedist 
   V[['ptwalk']] = cons_ptwalk + age2_ptwalk + age4_ptwalk + age5_ptwalk + age6_ptwalk + female_ptwalk + inc1_ptwalk + inc2_ptwalk + inc3_ptwalk + 
@@ -204,7 +205,7 @@ forecast = apollo_prediction(modelsht,
                                      apollo_probabilities,
                                      apollo_inputs)
                                       
-write.csv(forecast,file = "data/manchester/forcast_modelsht.csv")
+write.csv(forecast,file = "result/Manchester/mandatory/Version2/forcast_modelsht.csv")
 
 #### Likelihood ratio tests against MNL model
 # ################################################################# #

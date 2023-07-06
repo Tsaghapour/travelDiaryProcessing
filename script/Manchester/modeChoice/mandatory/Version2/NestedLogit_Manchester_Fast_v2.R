@@ -12,8 +12,8 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
 
-#mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-mandatory_trips <- read.csv("/Users/tayebeh/Library/CloudStorage/OneDrive-RMITUniversity/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv")
+#mandatory_trips <- read.csv("data/manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
+mandatory_trips <- read.csv("data/manchester/mandatory_trips92.csv")
 database <- mandatory_trips
 
 #generating unique tripid
@@ -22,6 +22,10 @@ database <- mutate(database, tripID = row_number())
 #relocating columns 
 database <- database %>%
   relocate(tripID, .before = indiv.id)
+
+# correlation test
+# cor(database[,c('fast_walk_vgvi','fast_walk_POIs','fast_walk_negPOIs','fast_walk_shannon','fast_walk_jctStress','fast_walk_linkStress','fast_walk_crime',
+#                'fast_walk_lights')], use = "complete.obs")
 
 ### Initialize code
 apollo_initialise()
@@ -32,7 +36,6 @@ apollo_control = list(
   modelDescr = "Nested logit with socio-demographics and fast route-based measures on mode choice",
   indivID    = "tripID",
   panelData  = FALSE,
-  weights    = "weight_fast",
   nCores     = 6
 )
 
@@ -46,7 +49,7 @@ apollo_beta =c(cons_carp = 0, cons_walk = 0, cons_bike = 0, cons_ptwalk = 0,
                f_age4_carp = 0, f_age4_walk = 0, f_age4_bike = 0, f_age4_ptwalk = 0,
                f_age5_carp = 0, f_age5_walk = 0, f_age5_bike = 0, f_age5_ptwalk = 0,
                f_age6_carp = 0, f_age6_walk = 0, f_age6_bike = 0, f_age6_ptwalk = 0,
-               f_age7_carp = 0, f_age7_walk = 0, f_age7_bike = 0, f_age7_ptwalk = 0,
+               # f_age7_carp = 0, f_age7_walk = 0, f_age7_bike = 0, f_age7_ptwalk = 0,
                f_female_carp = 0, f_female_walk = 0, f_female_bike = 0, f_female_ptwalk = 0,
                #f_hhstructure_carp = 0, f_hhstructure_walk = 0, f_hhstructure_bike = 0, f_hhstructure_ptwalk = 0, 
                f_inc1_carp = 0, f_inc1_walk = 0, f_inc1_bike = 0, f_inc1_ptwalk = 0, 
@@ -60,20 +63,16 @@ apollo_beta =c(cons_carp = 0, cons_walk = 0, cons_bike = 0, cons_ptwalk = 0,
                #f_work3_carp = 0, f_work3_walk = 0, f_work3_bike = 0, f_work3_ptwalk = 0, # low number of obs in worktype 3 and 5
                f_work4_carp = 0, f_work4_walk = 0, f_work4_bike = 0, f_work4_ptwalk = 0, 
                #f_work5_carp = 0, f_work5_walk = 0, f_work5_bike = 0, f_work5_ptwalk = 0, 
-               #f_vgvi_walk = 0, f_vgvi_bike = 0, 
-               #f_light_walk = 0, f_light_bike = 0, 
-               #f_shannon_walk = 0, f_shannon_bike = 0,  
-               #f_crime_walk = 0, f_crime_bike = 0, 
-               f_attract_walk = 0, f_attract_bike = 0,  
-               f_streslnk_walk = 0, f_streslnk_bike = 0, 
-               f_stresjct_walk = 0, f_stresjct_bike = 0, 
-               #f_sumstress_walk = 0, f_sumstress_bike = 0,
+               f_vgvi_walk = 0, f_vgvi_bike = 0,
+               f_light_walk = 0, f_light_bike = 0,
+               f_shannon_walk = 0, f_shannon_bike = 0,
+               f_crime_walk = 0, f_crime_bike = 0,
+               f_streslnk_bike = 0, # f_streslnk_walk = 0, 
+               f_stresjct_walk = 0, # f_stresjct_bike = 0, 
                #f_poi_walk = 0, f_poi_bike = 0, 
                #f_negpoi_walk = 0, f_negpoi_bike = 0, 
-               #f_sumpois_walk = 0, f_sumpois_bike = 0,
-               #f_freightpoi_walk = 0, f_freightpoi_bike = 0, 
-               #f_costcarp = 0, f_costwalk = 0, f_costbike = 0, f_costpt = 0,
                f_timecarp = 0, f_timewalk = 0, f_timebike = 0, f_timept = 0,
+               #f_distwalk = 0, f_distbike = 0,
                lambda_car = 1)
 
 # ################################################################# #
@@ -108,7 +107,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   age4_carp = f_age4_carp * (agegroup == 4); age4_walk = f_age4_walk * (agegroup == 4);age4_bike = f_age4_bike * (agegroup == 4);age4_ptwalk = f_age4_ptwalk * (agegroup == 4)
   age5_carp = f_age5_carp * (agegroup == 5); age5_walk = f_age5_walk * (agegroup == 5);age5_bike = f_age5_bike * (agegroup == 5);age5_ptwalk = f_age5_ptwalk * (agegroup == 5)
   age6_carp = f_age6_carp * (agegroup == 6); age6_walk = f_age6_walk * (agegroup == 6);age6_bike = f_age6_bike * (agegroup == 6);age6_ptwalk = f_age6_ptwalk * (agegroup == 6)
-  age7_carp = f_age7_carp * (agegroup == 7); age7_walk = f_age7_walk * (agegroup == 7);age7_bike = f_age7_bike * (agegroup == 7);age7_ptwalk = f_age7_ptwalk * (agegroup == 7)
+  # age7_carp = f_age7_carp * (agegroup == 7); age7_walk = f_age7_walk * (agegroup == 7);age7_bike = f_age7_bike * (agegroup == 7);age7_ptwalk = f_age7_ptwalk * (agegroup == 7)
   ###sex
   female_carp = f_female_carp * (sex ==1); female_walk = f_female_walk * (sex==1); female_bike = f_female_bike * (sex==1); female_ptwalk = f_female_ptwalk * (sex==1)
   
@@ -136,64 +135,30 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   
   ####Linked-based measures
   ###################################################################################################
-  ######original attributes 
-  #vgvi_walk = f_vgvi_walk * t.route.walk_fast_vgvi; vgvi_bike = f_vgvi_bike * t.route.bike_fast_vgvi
-  #light_walk = f_light_walk * t.route.walk_fast_lighting; light_bike = f_light_bike * t.route.bike_fast_lighting 
-  #shannon_walk = f_shannon_walk *t.route.walk_fast_shannon; shannon_bike = f_shannon_bike *t.route.bike_fast_shannon 
-  #crime_walk = f_crime_walk *t.route.walk_fast_crime; crime_bike = f_crime_bike *t.route.bike_fast_crime 
-  #attract_walk = f_attract_walk *t.route.walk_fast_attractiveness; attract_bike = f_attract_bike *t.route.bike_fast_attractiveness
-  #streslnk_walk = f_streslnk_walk *t.route.walk_fast_stressLink; streslnk_bike = f_streslnk_bike *t.route.bike_fast_stressLink 
-  #stresjct_walk = f_stresjct_walk *t.route.walk_fast_stressJct; stresjct_bike = f_stresjct_bike *t.route.bike_fast_stressJct
-  #sumstresf_walk = f_sumstress_walk * sumstress_walk_fast; sumstress_bike = s_sumstress_bike * sumstress_bike_fast
-  #poi_walk = f_poi_walk *t.route.walk_fast_POIs; poi_bike = f_poi_bike *t.route.bike_fast_POIs;
-  #negpoi_walk = f_negpoi_walk *t.route.walk_fast_negPOIs; negpoi_bike = f_negpoi_bike *t.route.bike_fast_negPOIs
-  #freightpoi_walk = f_freightpoi_walk *t.route.walk_fast_freightPOIs; freightpoi_bike = f_freightpoi_bike *t.route.bike_fast_freightPOIs
-  #sumpois_walk = f_sumpois_walk * sumpois_walk_fast; sumpois_bike = f_sumpois_bike * sumpois_walk_fast
- 
-  ######log transformation
-  #vgvi_walk = f_vgvi_walk *log(1+t.route.walk_fast_vgvi); vgvi_bike = f_vgvi_bike *log(1+t.route.bike_fast_vgvi)
-  #light_walk = f_light_walk * log(1+t.route.walk_fast_lighting); light_bike = f_light_bike * log(1+t.route.bike_fast_lighting) 
-  #shannon_walk = f_shannon_walk * log(1+t.route.walk_fast_shannon); shannon_bike = f_shannon_bike * log(1+t.route.bike_fast_shannon)  
-  #crime_walk = f_crime_walk * log(1+t.route.walk_fast_crime); crime_bike = f_crime_bike * log(1+t.route.bike_fast_crime) 
-  #attract_walk = f_attract_walk * log(1+t.route.walk_fast_attractiveness); attract_bike = f_attract_bike * (1+t.route.bike_fast_attractiveness) 
-  #streslnk_walk = f_streslnk_walk * log(1+t.route.walk_fast_stressLink); streslnk_bike = f_streslnk_bike * log(1+t.route.bike_fast_stressLink) 
-  #stresjct_walk = f_stresjct_walk * log(1+t.route.walk_fast_stressJct); stresjct_bike = f_stresjct_bike *log(1+t.route.bike_fast_stressJct)
-  #poi_walk = f_poi_walk *log(1+t.route.walk_fast_POIs); poi_bike = f_poi_bike *log(1+t.route.bike_fast_POIs)
-  #negpoi_walk = f_negpoi_walk * log(1+t.route.walk_fast_negPOIs); negpoi_bike = f_negpoi_bike * log(1+t.route.bike_fast_negPOIs)
-  #freightpoi_walk = f_freightpoi_walk * log(1+t.route.walk_fast_freightPOIs); freightpoi_bike = f_freightpoi_bike * log(1+t.route.bike_fast_freightPOIs)
-  #sumstress_walk = f_sumstress_walk * log(1+sumstress_walk_fast); sumstress_bike = f_sumstress_bike * log(1+sumstress_bike_fast)
-  #sumpois_walk = f_sumpois_walk * log(1+sumpois_walk_fast); sumpois_bike = f_sumpois_bike * log(1+sumpois_bike_fast)
-  
-  ######raw values: divided by distance
-  #vgvi_walk = f_vgvi_walk * vgvi_walk_fast; vgvi_bike = f_vgvi_bike * vgvi_bike_fast 
-  #light_walk = f_light_walk * light_walk_fast; light_bike = f_light_bike * light_bike_fast 
-  #shannon_walk = f_shannon_walk * shannon_walk_fast; shannon_bike = f_shannon_bike * shannon_bike_fast 
-  #crime_walk = f_crime_walk * crime_walk_fast; crime_bike = f_crime_bike * crime_bike_fast
-  attract_walk = f_attract_walk * attract_walk_fast; attract_bike = f_attract_bike * attract_walk_fast
-  streslnk_walk = f_streslnk_walk * streslnk_walk_fast; streslnk_bike = f_streslnk_bike * streslnk_bike_fast
-  stresjct_walk = f_stresjct_walk * t.route.walk_fast_stressJct; stresjct_bike = f_stresjct_bike * t.route.bike_fast_stressJct
-  #poi_walk = f_poi_walk * poi_walk_fast; poi_bike = f_poi_bike * poi_walk_fast
-  #negpoi_walk = f_negpoi_walk * negpoi_walk_fast; negpoi_bike = f_negpoi_bike * negpoi_bike_fast
-  #freightpoi_walk = f_freightpoi_walk * freightpoi_walk_fast; freightpoi_bike = f_freightpoi_bike * freightpoi_bike_fast
-  #sumstress_walk = f_sumstress_walk * s.sumstress_walk_fast; sumstress_bike = f_sumstress_bike * s.sumstress_bike_fast
-  #sumpois_walk = f_sumpois_walk * s.sumpois_walk_fast; sumpois_bike = f_sumpois_bike * s.sumpois_bike_fast
+  vgvi_walk = f_vgvi_walk * fast_walk_vgvi*vgvi_day; vgvi_bike = f_vgvi_bike * fast_bike_vgvi * vgvi_day
+  light_walk = f_light_walk * fast_walk_lights2*light_night; light_bike = f_light_bike * fast_bike_lights2*light_night 
+  shannon_walk = f_shannon_walk *fast_walk_shannon; shannon_bike = f_shannon_bike *fast_bike_shannon 
+  crime_walk = f_crime_walk *fast_walk_crime; crime_bike = f_crime_bike *short_bike_crime 
+  # streslnk_walk = f_streslnk_walk *fast_walk_stressLink; 
+  streslnk_bike = f_streslnk_bike *fast_bike_stressLink 
+  stresjct_walk = f_stresjct_walk *fast_walk_stressJct; #stresjct_bike = f_stresjct_bike *fast_bike_stressJct
+  # poi_walk = f_poi_walk *fast_walk_POIs; poi_bike = f_poi_bike *fast_bike_POIs;
+  # negpoi_walk = f_negpoi_walk *fast_walk_negPOIs; negpoi_bike = f_negpoi_bike *fast_bike_negPOIs
   
   ###traveltime
-  carptime = f_timecarp * t.route.car_time; walktime = f_timewalk * t.route.walk_fast_time; biketime = f_timebike * t.route.bike_fast_time; ptwalktime = f_timept * (t.route.pt_ptTravelTime +t.route.pt_walkTravelTime)
-  
-  ###travelcost
-  #carpcost = f_costcarp * t.route.car_cost; walkcost = f_costwalk * t.route.walk_fast_cost; bikecost = f_costbike * t.route.bike_fast_cost; ptwalkcost = f_costpt * t.route.pt_walkDistance
+  # carptime = f_timecarp * car_time; walkdist = f_distwalk *logwalkdist; bikedist = f_distbike * logbikedist; ptwalktime = f_timept * otptotalpt_time
+  carptime = f_timecarp * car_time; walktime = f_timewalk *walk_time; biketime = f_timebike * bike_time; ptwalktime = f_timept * otptotalpt_time
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
   V[['card']]  = 0  
-  V[['carp']]  = cons_carp + age2_carp + age4_carp + age5_carp + age6_carp + age7_carp + female_carp + inc1_carp + inc2_carp + inc3_carp + inc4_carp + inc6_carp+
+  V[['carp']]  = cons_carp + age2_carp + age4_carp + age5_carp + age6_carp + female_carp + inc1_carp + inc2_carp + inc3_carp + inc4_carp + inc6_carp+
     carsno_carp + bikesno_carp + worktype2_carp + worktype4_carp + carptime 
-  V[['walk']]  = cons_walk + age2_walk + age4_walk + age5_walk + age6_walk + age7_walk + female_walk +inc1_walk + inc2_walk + inc3_walk + inc4_walk + inc6_walk +
-    carsno_walk + bikesno_walk + worktype2_walk + worktype4_walk + attract_walk + streslnk_walk + stresjct_walk + walktime 
-  V[['bike']] = cons_bike + age2_bike + age4_bike + age5_bike + age6_bike + age7_bike +female_bike + inc1_bike + inc2_bike + inc3_bike + inc4_bike +inc6_bike +
-    carsno_bike + bikesno_bike + worktype2_bike + worktype4_bike + attract_bike + streslnk_bike + stresjct_bike + biketime 
-  V[['ptwalk']] = cons_ptwalk + age2_ptwalk + age4_ptwalk + age5_ptwalk + age6_ptwalk + age7_ptwalk + female_ptwalk + inc1_ptwalk + inc2_ptwalk + inc3_ptwalk + 
+  V[['walk']]  = cons_walk + age2_walk + age4_walk + age5_walk + age6_walk + female_walk +inc1_walk + inc2_walk + inc3_walk + inc4_walk + inc6_walk +
+    carsno_walk + bikesno_walk + worktype2_walk + worktype4_walk + stresjct_walk + light_walk + vgvi_walk + shannon_walk + crime_walk + walktime 
+  V[['bike']] = cons_bike + age2_bike + age4_bike + age5_bike + age6_bike + female_bike + inc1_bike + inc2_bike + inc3_bike + inc4_bike +inc6_bike +
+    carsno_bike + bikesno_bike + worktype2_bike + worktype4_bike + streslnk_bike + light_bike + vgvi_bike + shannon_bike + crime_bike + biketime 
+  V[['ptwalk']] = cons_ptwalk + age2_ptwalk + age4_ptwalk + age5_ptwalk + age6_ptwalk + female_ptwalk + inc1_ptwalk + inc2_ptwalk + inc3_ptwalk + 
     inc4_ptwalk + inc6_ptwalk + carsno_ptwalk + bikesno_ptwalk + worktype2_ptwalk + worktype4_ptwalk + ptwalktime 
   
   ### Specify nests for NL model
@@ -220,7 +185,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   P[['model']] = apollo_nl(nl_settings, functionality)
   
   ### Prepare and return outputs of function
-  P = apollo_weighting(P, apollo_inputs, functionality)
+  # P = apollo_weighting(P, apollo_inputs, functionality)
   P = apollo_prepareProb(P, apollo_inputs, functionality)
   return(P)
 }
@@ -242,7 +207,7 @@ forecast = apollo_prediction(modelfst,
                                      apollo_probabilities,
                                      apollo_inputs)
                                       
-write.csv(forecast,file = "/Users/tayebeh/Library/CloudStorage/OneDrive-RMITUniversity/WORK/JIBE/DATA Analysis/R/Manchester/forcast_modelfst.csv")
+write.csv(forecast,file ="result/Manchester/mandatory/Version2/forcast_modelfst.csv")
 
 #### Likelihood ratio tests against MNL model
 # ################################################################# #
@@ -274,5 +239,5 @@ estimateValues <- paste(round(modelfst_estimates,3),"[",round(modelfst_tTest,3),
 estimateValues[modelfst_estimates == 0] <- NA
 names(estimateValues) = names(apollo_beta)
 estimate_lambdas <- estimateValues[startsWith(names(apollo_beta),"lambda")]
-write.csv(estimateValues,file = "/Users/tayebeh/Library/CloudStorage/OneDrive-RMITUniversity/WORK/JIBE/DATA Analysis/R/Manchester/estimatevalues_modelfst_f.csv")
+write.csv(estimateValues,file = "result/Manchester/mandatory/Version2/estimatevalues_modelfst_f2.csv")
 
