@@ -10,7 +10,7 @@ library(lme4)
 library(lattice)
 
 ## reading data
-mandatory_trips<-read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/LinkedBasedAttributes/LinkBased/TEST/mandatory_trips92.csv")
+mandatory_trips<-read.csv("data/manchester/mandatory_trips92.csv")
 
 ## correlation tests between variables
 cor(mandatory_trips[,c('short_walk_lights2','short_walk_POIs','short_walk_negPOIs','short_walk_vgvi','short_walk_crime','short_walk_shannon',
@@ -48,9 +48,14 @@ glm_b7 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(w
 
 summary(glm_b7)
 
-# Create your multilevel binomial regression model with nested random effects
-model_manchester <- glmer(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressJct + short_bike_crime +
-                     short_bike_shannon + (1 | hh.id.x) + (1 | indiv.id), family = binomial(), data = mandatory_trips)
+# multilevel binomial regression model with nested random effects
+# two level model (trips nested within individuals)
+ML_w2 <- glmer(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct + 
+                 short_walk_shannon + (1 | indiv.id), family = binomial(), data = mandatory_trips)
+
+# three level model (trips nested within individuals, individuals nested within households)
+ML_w2 <- glmer(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct + 
+                     short_walk_shannon + (1 | hh.id.x) + (1 | indiv.id), family = binomial(), data = mandatory_trips)
 
 # Print the summary of the model
 summary(model_manchester)
