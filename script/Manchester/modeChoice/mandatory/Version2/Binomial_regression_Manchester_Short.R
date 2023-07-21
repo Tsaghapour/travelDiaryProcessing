@@ -37,15 +37,33 @@ glm_w7 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(w
 summary(glm_w7)
 glm_w8 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_negPOIs, data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_w8)
-glm_w9 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct + short_walk_crime +
-             short_walk_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+glm_w9 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct,
+             data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_w9)
-glm_w10 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink + short_walk_stressJct + 
-                short_walk_crime + short_walk_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+glm_w10 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink,
+              data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_w10)
-glm_w11 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink + short_walk_stressJct + 
-                 short_walk_crime + short_walk_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+glm_w11 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct + short_walk_POIs,
+              data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_w11)
+glm_w12 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink + short_walk_POIs,
+               data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_w12)
+glm_w13 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct + short_walk_shannon,
+               data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_w13)
+glm_w14 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink + short_walk_shannon,
+               data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_w14)
+glm_w15 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressJct + short_walk_crime +
+                short_walk_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_w15)
+glm_w16 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink + short_walk_stressJct + 
+                short_walk_crime + short_walk_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_w16)
+glm_w17 <- glm(walking ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_walk_lights2 + short_walk_vgvi + short_walk_stressLink + short_walk_stressJct + 
+                 short_walk_crime + short_walk_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_w17)
 
 # cycling
 glm_b1 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2, data=mandatory_trips, family = binomial, model=TRUE)
@@ -64,15 +82,33 @@ glm_b7 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(w
 summary(glm_b7)
 glm_b8 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_negPOIs, data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_b8)
-glm_b9 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressJct + short_bike_crime +
-                short_bike_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+glm_b9 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressJct,
+                data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_b9)
-glm_b10 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink + short_bike_stressJct + short_bike_crime +
-                short_bike_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+glm_b10 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink,
+              data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_b10)
-glm_b11 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink + short_bike_stressJct + short_bike_crime +
-                 short_bike_POIs, data=mandatory_trips, family = binomial, model=TRUE)
+glm_b11 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressJct + short_bike_POIs,
+              data=mandatory_trips, family = binomial, model=TRUE)
 summary(glm_b11)
+glm_b12 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink + short_bike_POIs,
+               data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_b12)
+glm_b13 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressJct + short_bike_shannon,
+               data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_b13)
+glm_b14 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink + short_bike_shannon,
+               data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_b14)
+glm_b15 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressJct + short_bike_crime +
+                short_bike_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_b15)
+glm_b16 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink + short_bike_stressJct + short_bike_crime +
+                short_bike_shannon, data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_b16)
+glm_b17 <- glm(bicycle ~ as.factor(agegroup) + p.female + hh.income + as.factor(worktype) + carsno + bikesno + short_bike_lights2 + short_bike_vgvi + short_bike_stressLink + short_bike_stressJct + short_bike_crime +
+                 short_bike_POIs, data=mandatory_trips, family = binomial, model=TRUE)
+summary(glm_b17)
 
 # multilevel binomial regression model with nested random effects
 # two level model (trips nested within individuals)
