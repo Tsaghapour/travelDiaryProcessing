@@ -13,8 +13,8 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 # ################################################################# #
 
 #mandatory_trips <- read.csv("data/manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-mandatory_trips <- read.csv("data/manchester/mandatory_trips92.csv")
-database <- mandatory_trips
+commute_trips <- read.csv("data/manchester/mandatory_trips92.csv")
+database <- commute_trips
 
 #generating unique tripid
 database <- mutate(database, tripID = row_number())
@@ -39,7 +39,7 @@ apollo_control = list(
   nCores     = 6
 )
 
-outputDir <- "JIBE/DATA Analysis/R/Manchester/"
+# outputDir <- "JIBE/DATA Analysis/R/Manchester/"
 
 #### DEFINE MODEL PARAMETERS
 ### Vector of parameters, including any that are kept fixed in estimation
@@ -145,7 +145,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   # negpoi_walk = s_negpoi_walk *short_walk_negPOIs; negpoi_bike = s_negpoi_bike *short_bike_negPOIs
 
   ###traveltime
-  carptime = s_timecarp * car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * otptotalpt_time
+  carptime = s_timecarp * short_car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * otptotalpt_time
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
