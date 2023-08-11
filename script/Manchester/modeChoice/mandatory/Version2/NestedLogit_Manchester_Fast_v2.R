@@ -11,16 +11,24 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 # ################################################################# #
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
+All_trips <- read.csv("data/manchester/All_trips92.csv")
+# for commute trips
+database <- subset(All_trips, t.purpose %in% c("work","education"))
+# for non-commute trips
+database <- subset(All_trips, t.purpose %in% c("shop","recreation","rrt","nhb work","nhb other","escort","other"))
+# database <- subset(All_trips, t.purpose %in% c("shop"))
+# database <- subset(All_trips, t.purpose %in% c("recreation"))
+# database <- subset(All_trips, t.purpose %in% c("rrt","nhb work","nhb other","escort","other"))
 
-#mandatory_trips <- read.csv("data/manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-mandatory_trips <- read.csv("data/manchester/mandatory_trips92.csv")
-database <- mandatory_trips
+# database <- database[!is.na(database$pt_totalTravelTime), ]
 
 #generating unique tripid
 database <- mutate(database, tripID = row_number())
 
 #relocating columns 
 database <- database %>%
+  unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+  relocate(indiv.id, .after = hh.id) %>%
   relocate(tripID, .before = indiv.id)
 
 # correlation test
@@ -147,7 +155,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   
   ###traveltime
   # carptime = f_timecarp * car_time; walkdist = f_distwalk *logwalkdist; bikedist = f_distbike * logbikedist; ptwalktime = f_timept * otptotalpt_time
-  carptime = f_timecarp * car_time; walktime = f_timewalk *walk_time; biketime = f_timebike * bike_time; ptwalktime = f_timept * otptotalpt_time
+  carptime = f_timecarp * fast_car_time; walktime = f_timewalk *fast_walk_time; biketime = f_timebike * fast_bike_time; ptwalktime = f_timept * pt_totalTravelTime
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()

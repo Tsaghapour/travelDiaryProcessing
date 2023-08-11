@@ -11,57 +11,56 @@ suppressPackageStartupMessages(library(tidyverse))# for manipulating data
 suppressPackageStartupMessages(library(expss))# for manipulating data
 
 #reading files
-trads <- read_rds("data/manchester/TRADS_safe_routed_v2.rds")
+trads <- read_rds("data/manchester/TRADS_safe.rds")
 list2env(trads, globalenv())
-oldtrips <- trips
-trips_short <- read.csv("data/manchester/commuteShort92.csv", header = T)
-trips_fast <- read.csv("data/manchester/commutefast92.csv", header = T)
+trips <- trips
+route_short <- read.csv("data/manchester/AllShort92.csv", header = T)
+route_fast <- read.csv("data/manchester/AllFast92.csv", header = T)
 updatedpt <- read.csv("data/manchester/OtpPtDataManchester.csv", header = T)
 
 ## renaming columns
-names(trips_short)[names(trips_short) == "IDNumber"] <- "hh.id"
-names(trips_short)[names(trips_short) == "PersonNumber"] <- "p.id"
-names(trips_short)[names(trips_short) == "TripNumber"] <- "t.id"
-names(trips_fast)[names(trips_fast) == "IDNumber"] <- "hh.id"
-names(trips_fast)[names(trips_fast) == "PersonNumber"] <- "p.id"
-names(trips_fast)[names(trips_fast) == "TripNumber"] <- "t.id"
+names(route_short)[names(route_short) == "IDNumber"] <- "hh.id"
+names(route_short)[names(route_short) == "PersonNumber"] <- "p.id"
+names(route_short)[names(route_short) == "TripNumber"] <- "t.id"
+names(route_fast)[names(route_fast) == "IDNumber"] <- "hh.id"
+names(route_fast)[names(route_fast) == "PersonNumber"] <- "p.id"
+names(route_fast)[names(route_fast) == "TripNumber"] <- "t.id"
 
-#creating unique id for individuals
-indiv <- indiv %>%
-  unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
-  relocate(indiv.id, .after = hh.id)
-trips_short <- trips_short %>%
-  unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
-  relocate(indiv.id, .after = hh.id)
-trips_fast <- trips_fast %>%
-  unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
-  relocate(indiv.id, .after = hh.id)
 
-#creating unique id for trips
-oldtrips$trip.id <- paste(oldtrips$hh.id, oldtrips$p.id, oldtrips$t.id, sep ='')
-oldtrips <- oldtrips %>% relocate(trip.id, .after = t.id)
-trips_abm$trip.id <- paste(trips_abm$hh.id, trips_abm$p.id, trips_abm$t.id, sep ='')
-trips_abm <- trips_abm %>% relocate(trip.id, .after = t.id)
-trips_short <- trips_short %>%
-  unite("trip.id", c('indiv.id', 't.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
-  relocate(trip.id, .after = indiv.id)
-trips_fast <- trips_fast %>%
-  unite("trip.id", c('indiv.id', 't.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
-  relocate(trip.id, .after = indiv.id)
+# #creating unique id for individuals
+# indiv <- indiv %>%
+#   unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+#   relocate(indiv.id, .after = hh.id)
+# route_short <- route_short %>%
+#   unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+#   relocate(indiv.id, .after = hh.id)
+# route_fast <- route_fast %>%
+#   unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+#   relocate(indiv.id, .after = hh.id)
+# 
+# #creating unique id for trips
+# # trips$trip.id <- paste(trips$hh.id, oldtrips$p.id, oldtrips$t.id, sep ='')
+# # trips <- trips %>% relocate(trip.id, .after = t.id)
+# route_short <- route_short %>%
+#   unite("trip.id", c('indiv.id', 't.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+#   relocate(trip.id, .after = indiv.id)
+# route_fast <- route_fast %>%
+#   unite("trip.id", c('indiv.id', 't.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+#   relocate(trip.id, .after = indiv.id)
+
 
 ## adding short and fast to the columns name
 start_col <- 4
-end_col <- 26
-colnames(trips_short)[start_col:end_col] <- paste("short_", colnames(trips_short)[start_col:end_col], sep = "")
-colnames(trips_fast)[start_col:end_col] <- paste("fast_", colnames(trips_fast)[start_col:end_col], sep = "")
+end_col <- 24
+colnames(route_short)[start_col:end_col] <- paste("short_", colnames(route_short)[start_col:end_col], sep = "")
+colnames(route_fast)[start_col:end_col] <- paste("fast_", colnames(route_fast)[start_col:end_col], sep = "")
 
-## merging trips characteristics from the old file to the new trips data
-trips <- merge(trips_short, trips_fast, by=c("trip.id","hh.id","indiv.id"))
-oldtrips <- subset(oldtrips, select = -c(1:3))
-trips <- merge(trips, oldtrips, by="trip.id")
-trips <- merge(trips, updatedpt, by="trip.id")
-trips_abm <- subset(trips_abm, select = -c(1:3))
-trips <- merge(trips, trips_abm, by="trip.id")
+## merging files
+route_all <- left_join(route_short, route_fast)
+trips <- left_join(route_all, trips)
+trips <- left_join(trips, updatedpt)
+trips_hh <- left_join(trips, households)
+trips_hh_p <- left_join(trips_hh, indiv)
 
 # deleting the old BE variables
 names(trips)[names(trips) == "t.route.pt_ptTravelTime"] <- "oldpt_ptTravelTime"
@@ -72,10 +71,6 @@ names(trips)[names(trips) == "t.route.walk_short_time"] <- "troutewalk_short_tim
 names(trips)[names(trips) == "t.route.bike_short_time"] <- "troutebike_short_time"
 cols_to_delete <- grep("t.route", names(trips), value = TRUE)
 trips <- trips[, !(names(trips) %in% cols_to_delete)]
-
-#merging trip data with household and person data
-trips_hh <- merge(trips,households, by="hh.id")
-trips_hh_p <- merge(trips_hh,indiv, by="indiv.id")
 
 #recoding sex var
 trips_hh_p$sex[trips_hh_p$p.female=="TRUE"] = 1
@@ -199,21 +194,12 @@ trips_hh_p$bicycle <- 0
 trips_hh_p$bicycle[trips_hh_p$mainmode == 4] = 1
 
 # log transformation of distance variable 
+# trips_hh_p<-trips_hh_p[trips_hh_p$short_walk_dist > 0 & trips_hh_p$short_bike_dist > 0 & trips_hh_p$fast_car_time>0 & trips_hh_p$pt_totalTravelTime >0,]
+# trips_hh_p$logwalkdist <- log(trips_hh_p$short_walk_dist)
+# trips_hh_p$logbikedist <- log(trips_hh_p$short_bike_dist)
 trips_hh_p$logwalkdist <- ifelse(trips_hh_p$short_walk_dist > 0, log(trips_hh_p$short_walk_dist), 0)
 trips_hh_p$logbikedist <- ifelse(trips_hh_p$short_bike_dist > 0, log(trips_hh_p$short_bike_dist), 0)
 
-#trips_hh_p$t.route.pt_accessDistance[is.na(trips_hh_p$t.route.pt_accessDistance)] = 0
-#trips_hh_p$t.route.t.route.pt_egressDistance[is.na(trips_hh_p$t.route.pt_egressDistance)] = 0
-#generating pt cost (travel cost was not provided: total distance to pt stop and distance to destination used as the cost of PT)
-#trips_hh_p$troutept_accessdistance <- as.numeric(trips_hh_p$t.route.pt_accessDistance)
-#trips_hh_p$troutept_accessdistance[is.na(trips_hh_p$troutept_accessdistance)] = 0
-#trips_hh_p$troutept_egressdistance <- as.numeric(trips_hh_p$t.route.pt_egressDistance)
-#trips_hh_p$troutept_egressdistance[is.na(trips_hh_p$t.route.pt_egressDistance)] = 0
-#trips_hh_p$t.route.pt_totalTravelCost <- trips_hh_p$troutept_accessdistance + trips_hh_p$troutept_egressdistance
-
-#extracting work and education trips
-#tripsWE<- subset(trips_hh_p, t.startPurpose=="Home"& t.endPurpose=="Usual place of work"|t.endPurpose=="Unpaid, voluntary work"|
-#t.endPurpose=="Education as pupil, student" | t.endPurpose== "Work - Business, other")
-#write_labelled_csv(tripsWE,file = "data/manchester/mandatory_trips.csv",row.names=FALSE, single_file = TRUE)
-write.csv(trips_hh_p,file = "data/manchester/mandatory_trips92.csv",row.names=FALSE)
+#save to csv
+write.csv(trips_hh_p,file = "data/manchester/All_trips92.csv",row.names=FALSE)
 

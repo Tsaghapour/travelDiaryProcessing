@@ -2,7 +2,7 @@
 #### LOAD LIBRARY AND DEFINE CORE SETTINGS                       ####
 ### Clear memory
 rm(list = ls())
-#rm(list= ls()[!(ls() %in% c('modelmnl','modelsht','modelsht2'))])
+#rm(list= ls()[!(ls() %in% c('modelmnl','modelsht','modelfst'))])
 
 ### Load Apollo library
 library(apollo)
@@ -11,16 +11,24 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 # ################################################################# #
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
+All_trips <- read.csv("data/manchester/All_trips92.csv")
+# for commute trips
+database <- subset(All_trips, t.purpose %in% c("work","education"))
+# for non-commute trips
+database <- subset(All_trips, t.purpose %in% c("shop","recreation","rrt","nhb work","nhb other","escort","other"))
+# database <- subset(All_trips, t.purpose %in% c("shop"))
+# database <- subset(All_trips, t.purpose %in% c("recreation"))
+# database <- subset(All_trips, t.purpose %in% c("rrt","nhb work","nhb other","escort","other"))
 
-#mandatory_trips <- read.csv("data/manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-commute_trips <- read.csv("data/manchester/mandatory_trips92.csv")
-database <- commute_trips
+# database <- database[!is.na(database$pt_totalTravelTime), ]
 
 #generating unique tripid
 database <- mutate(database, tripID = row_number())
 
 #relocating columns 
 database <- database %>%
+  unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+  relocate(indiv.id, .after = hh.id) %>%
   relocate(tripID, .before = indiv.id)
 
 # correlation test
@@ -135,7 +143,8 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   ####Linked-based measures
   ###################################################################################################
   vgvi_walk = s_vgvi_walk * short_walk_vgvi*vgvi_day; vgvi_bike = s_vgvi_bike * short_bike_vgvi * vgvi_day
-  light_walk = s_light_walk * short_walk_lights2*light_night; light_bike = s_light_bike * short_bike_lights2*light_night 
+  light_walk = s_light_walk * short_walk_lights2*light_night; light_bike = s_light_bike * short_bike_lights2*light_night
+  # light_walk = s_light_walk * short_walk_lights; light_bike = s_light_bike * short_bike_lights 
   shannon_walk = s_shannon_walk *short_walk_shannon; shannon_bike = s_shannon_bike *short_bike_shannon 
   crime_walk = s_crime_walk *short_walk_crime; crime_bike = s_crime_bike *short_bike_crime 
   # streslnk_walk = s_streslnk_walk *short_walk_stressLink; 
@@ -145,7 +154,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   # negpoi_walk = s_negpoi_walk *short_walk_negPOIs; negpoi_bike = s_negpoi_bike *short_bike_negPOIs
 
   ###traveltime
-  carptime = s_timecarp * short_car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * otptotalpt_time
+  carptime = s_timecarp * short_car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * pt_totalTravelTime
   
   ### List of utilities: these must use the same names as in nl_settings, order is irrelevant
   V = list()
@@ -191,12 +200,10 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
 # ################################################################# #
 #### MODEL ESTIMATION                                            ####
 # ################################################################# #
-
-modelsht = apollo_estimate(apollo_beta, apollo_fixed, apollo_probabilities, apollo_inputs)
-
-#, estimate_settings=list(constraints=c(
-#                                       "lambda_car < 1 + 1e-10", "lambda_car > -1e-10",
-#                                       "lambda_active < 1 + 1e-10", "lambda_PT > -1e-10")))
+modelsht = apollo_estimate(apollo_beta, apollo_fixed, apollo_probabilities, apollo_inputs) 
+                           # ,estimate_settings=list(constraints=c(
+                           #             "lambda_car < 1 + 1e-10", "lambda_car > -1e-10")))
+                                       # "lambda_active < 1 + 1e-10", "lambda_PT > -1e-10")))
 
 # ################################################################# #
 #### MODEL PEREDICTION                                           ####
