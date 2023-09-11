@@ -13,14 +13,12 @@ suppressPackageStartupMessages(library(dplyr)) # for manipulating data
 # ################################################################# #
 All_trips <- read.csv("data/manchester/All_trips92.csv")
 # for commute trips
-database <- subset(All_trips, t.purpose %in% c("work","education"))
+# database <- subset(All_trips, t.purpose %in% c("work","education"))
 # for non-commute trips
 database <- subset(All_trips, t.purpose %in% c("shop","recreation","rrt","nhb work","nhb other","escort","other"))
 # database <- subset(All_trips, t.purpose %in% c("shop"))
 # database <- subset(All_trips, t.purpose %in% c("recreation"))
 # database <- subset(All_trips, t.purpose %in% c("rrt","nhb work","nhb other","escort","other"))
-
-# database <- database[!is.na(database$pt_totalTravelTime), ]
 
 #generating unique tripid
 database <- mutate(database, tripID = row_number())
