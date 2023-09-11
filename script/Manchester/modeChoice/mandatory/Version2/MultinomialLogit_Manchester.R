@@ -5,21 +5,38 @@ rm(list = ls())
 
 ### Load Apollo library
 library(apollo)
+suppressPackageStartupMessages(library(dplyr)) # for manipulating data
+suppressPackageStartupMessages(library(tidyr)) # for manipulating data
 
 # ################################################################# #
 #### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
 # ################################################################# #
+All_trips <- read.csv("data/manchester/All_trips92.csv")
+# for commute trips
+# database <- subset(All_trips, t.purpose %in% c("work","education"))
 
-#mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv",stringsAsFactors = TRUE)
-mandatory_trips <- read.csv("C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/mandatory_trips.csv")
-database <- mandatory_trips
+# for non-commute trips
+database <- subset(All_trips, t.purpose %in% c("shop","recreation","rrt","nhb work","nhb other","escort","other"))
+# database <- subset(All_trips, t.purpose %in% c("shop"))
+# database <- subset(All_trips, t.purpose %in% c("recreation"))
+# database <- subset(All_trips, t.purpose %in% c("rrt","nhb work","nhb other","escort","other"))
+
+# database <- database[!is.na(database$pt_totalTravelTime), ]
 
 #generating unique tripid
 database <- mutate(database, tripID = row_number())
 
 #relocating columns 
 database <- database %>%
+  unite("indiv.id", c('hh.id', 'p.id'), sep ='', na.rm = TRUE, remove = FALSE)%>%
+  relocate(indiv.id, .after = hh.id) %>%
   relocate(tripID, .before = indiv.id)
+
+database <- subset(database,!is.na(pt_totalTravelTime))
+
+# correlation test
+# cor(database[,c('short_walk_vgvi','short_walk_POIs','short_walk_negPOIs','short_walk_shannon','short_walk_jctStress','short_walk_linkStress','short_walk_crime',
+#                'short_walk_lights')], use = "complete.obs")
 
 ### Initialise code
 apollo_initialise()
@@ -43,12 +60,12 @@ apollo_beta =c(cons_carp = 0, cons_walk = 0, cons_bike = 0, cons_ptwalk = 0,
                s_age4_carp = 0, s_age4_walk = 0, s_age4_bike = 0, s_age4_ptwalk = 0,
                s_age5_carp = 0, s_age5_walk = 0, s_age5_bike = 0, s_age5_ptwalk = 0,
                s_age6_carp = 0, s_age6_walk = 0, s_age6_bike = 0, s_age6_ptwalk = 0,
-               s_age7_carp = 0, s_age7_walk = 0, s_age7_bike = 0, s_age7_ptwalk = 0,
+               # s_age7_carp = 0, s_age7_walk = 0, s_age7_bike = 0, s_age7_ptwalk = 0,
                s_female_carp = 0, s_female_walk = 0, s_female_bike = 0, s_female_ptwalk = 0,
                #s_hhstructure_carp = 0, s_hhstructure_walk = 0, s_hhstructure_bike = 0, s_hhstructure_ptwalk = 0, 
                s_inc1_carp = 0, s_inc1_walk = 0, s_inc1_bike = 0, s_inc1_ptwalk = 0, 
                s_inc2_carp = 0, s_inc2_walk = 0, s_inc2_bike = 0, s_inc2_ptwalk = 0,
-               s_inc3_carp = 0, s_inc3_walk = 0, s_inc3_bike = 0, s_inc3_ptwalk = 0, 
+               s_inc3_carp = 0, s_inc3_walk = 0, s_inc3_bike = 0, s_inc3_ptwalk = 0,
                s_inc4_carp = 0, s_inc4_walk = 0, s_inc4_bike = 0, s_inc4_ptwalk = 0, 
                s_inc6_carp = 0, s_inc6_walk = 0, s_inc6_bike = 0, s_inc6_ptwalk = 0,
                s_cars_carp = 0, s_cars_walk = 0, s_cars_bike = 0, s_cars_ptwalk = 0,
@@ -58,17 +75,15 @@ apollo_beta =c(cons_carp = 0, cons_walk = 0, cons_bike = 0, cons_ptwalk = 0,
                s_work4_carp = 0, s_work4_walk = 0, s_work4_bike = 0, s_work4_ptwalk = 0, 
                #s_work5_carp = 0, s_work5_walk = 0, s_work5_bike = 0, s_work5_ptwalk = 0, 
                s_vgvi_walk = 0, s_vgvi_bike = 0, 
-               #s_light_walk = 0, s_light_bike = 0, 
+               s_light_walk = 0, s_light_bike = 0,
                s_shannon_walk = 0, s_shannon_bike = 0,  
                s_crime_walk = 0, s_crime_bike = 0, 
-               s_attract_walk = 0, s_attract_bike = 0,  
-               #s_streslnk_walk = 0, s_streslnk_bike = 0, 
-               s_stresjct_walk = 0, s_stresjct_bike = 0, 
-               s_poi_walk = 0, s_poi_bike = 0, 
+               s_streslnk_bike = 0, # s_streslnk_walk = 0,
+               s_stresjct_walk = 0, # s_stresjct_bike = 0, 
+               # s_poi_walk = 0, s_poi_bike = 0, 
                #s_negpoi_walk = 0, s_negpoi_bike = 0, 
                #s_freightpoi_walk = 0, s_freightpoi_bike = 0, 
-               s_costcarp = 0, s_costwalk = 0, s_costbike = 0, s_costpt = 0,
-               s_timecarp = 0, s_timewalk = 0, s_timebike = 0, s_timept = 0)
+               s_timecarp = 0, s_distwalk = 0, s_distbike = 0, s_timept = 0)
 
 # ################################################################# #
 #### DEFINE RANDOM COMPONENTS                                    ####
@@ -102,7 +117,7 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   age4_carp = s_age4_carp * (agegroup == 4); age4_walk = s_age4_walk * (agegroup == 4);age4_bike = s_age4_bike * (agegroup == 4);age4_ptwalk = s_age4_ptwalk * (agegroup == 4)
   age5_carp = s_age5_carp * (agegroup == 5); age5_walk = s_age5_walk * (agegroup == 5);age5_bike = s_age5_bike * (agegroup == 5);age5_ptwalk = s_age5_ptwalk * (agegroup == 5)
   age6_carp = s_age6_carp * (agegroup == 6); age6_walk = s_age6_walk * (agegroup == 6);age6_bike = s_age6_bike * (agegroup == 6);age6_ptwalk = s_age6_ptwalk * (agegroup == 6)
-  age7_carp = s_age7_carp * (agegroup == 7); age7_walk = s_age7_walk * (agegroup == 7);age7_bike = s_age7_bike * (agegroup == 7);age7_ptwalk = s_age7_ptwalk * (agegroup == 7)
+  # age7_carp = s_age7_carp * (agegroup == 7); age7_walk = s_age7_walk * (agegroup == 7);age7_bike = s_age7_bike * (agegroup == 7);age7_ptwalk = s_age7_ptwalk * (agegroup == 7)
   #sex
   female_carp = s_female_carp * (sex ==1); female_walk = s_female_walk * (sex==1); female_bike = s_female_bike * (sex==1); female_ptwalk = s_female_ptwalk * (sex==1)
   #hhstructure
@@ -117,47 +132,40 @@ apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimat
   carsno_carp = s_cars_carp * carsno ; carsno_walk = s_cars_walk * carsno; carsno_bike = s_cars_bike * carsno; carsno_ptwalk = s_cars_ptwalk * carsno
   #bikeno
   bikesno_carp = s_bikes_carp * bikesno; bikesno_walk = s_bikes_walk * bikesno; bikesno_bike = s_bikes_bike * bikesno; bikesno_ptwalk = s_bikes_ptwalk * bikesno
-  #worktype
+
+    #worktype
   worktype2_carp = s_work2_carp * (worktype == 2); worktype2_walk = s_work2_walk * (worktype == 2); worktype2_bike = s_work2_bike * (worktype == 2); worktype2_ptwalk = s_work2_ptwalk * (worktype == 2)
   #worktype3_carp = s_work3_carp * (worktype == 3); worktype3_walk = s_work3_walk * (worktype == 3); worktype3_bike = s_work3_bike * (worktype == 3); worktype3_ptwalk = s_work3_ptwalk * (worktype == 3)
   worktype4_carp = s_work4_carp * (worktype == 4); worktype4_walk = s_work4_walk * (worktype == 4); worktype4_bike = s_work4_bike * (worktype == 4); worktype4_ptwalk = s_work4_ptwalk * (worktype == 4)
   #worktype5_carp = s_work5_carp * (worktype == 5); worktype5_walk = s_work5_walk * (worktype == 5); worktype5_bike = s_work5_bike * (worktype == 5); worktype5_ptwalk = s_work5_ptwalk * (worktype == 5)
-  #vgvi
-  vgvi_walk = s_vgvi_walk * t.route.walk_short_vgvi; vgvi_bike = s_vgvi_bike * t.route.bike_short_vgvi
-  #lighitng
-  #light_walk = s_light_walk * t.route.walk_short_lighting; light_bike = s_light_bike * t.route.bike_short_lighting
-  #shannon
-  shannon_walk = s_shannon_walk *t.route.walk_short_shannon; shannon_bike = s_shannon_bike *t.route.bike_short_shannon;
-  #crime
-  crime_walk = s_crime_walk *t.route.walk_short_crime; crime_bike = s_crime_bike *t.route.bike_short_crime;
-  #attractiveness
-  attract_walk = s_attract_walk *t.route.walk_short_attractiveness; attract_bike = s_attract_bike *t.route.bike_short_attractiveness;
-  #stresslink
-  #streslnk_walk = s_streslnk_walk *t.route.walk_short_stressLink; streslnk_bike = s_streslnk_bike *t.route.bike_short_stressLink;
-  #stressjct
-  stresjct_walk = s_stresjct_walk *t.route.walk_short_stressJct; stresjct_bike = s_stresjct_bike *t.route.bike_short_stressJct;
-  #pois
-  poi_walk = s_poi_walk *t.route.walk_short_POIs; poi_bike = s_poi_bike *t.route.bike_short_POIs;
-  #negpois
-  #negpoi_walk = s_negpoi_walk *t.route.walk_short_negPOIs; negpoi_bike = s_negpoi_bike *t.route.bike_short_negPOIs;
-  #freightpoi
-  #freightpoi_walk = s_freightpoi_walk *t.route.walk_short_freightPOIs; freightpoi_bike = s_freightpoi_bike *t.route.bike_short_freightPOIs;
-  #traveltime
-  carptime = s_timecarp * t.route.car_time; walktime = s_timewalk * t.route.walk_short_time; biketime = s_timebike * t.route.bike_short_time; ptwalktime = s_timept *t.route.pt_totalTravelTime
-  #travelcost
-  carpcost = s_costcarp * t.route.car_cost; walkcost = s_costwalk * t.route.walk_short_cost; bikecost = s_costbike * t.route.bike_short_cost; ptwalkcost = s_costpt *t.route.pt_walkDistance
-  
+
+  ####Linked-based measures
+  ###################################################################################################
+  vgvi_walk = s_vgvi_walk * short_walk_vgvi*vgvi_day; vgvi_bike = s_vgvi_bike * short_bike_vgvi * vgvi_day
+  light_walk = s_light_walk * short_walk_lights2*light_night; light_bike = s_light_bike * short_bike_lights2*light_night
+  # light_walk = s_light_walk * short_walk_lights; light_bike = s_light_bike * short_bike_lights 
+  shannon_walk = s_shannon_walk *short_walk_shannon; shannon_bike = s_shannon_bike *short_bike_shannon 
+  crime_walk = s_crime_walk *short_walk_crime; crime_bike = s_crime_bike *short_bike_crime 
+  # streslnk_walk = s_streslnk_walk *short_walk_stressLink; 
+  streslnk_bike = s_streslnk_bike *short_bike_stressLink 
+  stresjct_walk = s_stresjct_walk *short_walk_stressJct; #stresjct_bike = s_stresjct_bike *short_bike_stressJct
+  # poi_walk = s_poi_walk *short_walk_POIs; poi_bike = s_poi_bike *short_bike_POIs;
+  # negpoi_walk = s_negpoi_walk *short_walk_negPOIs; negpoi_bike = s_negpoi_bike *short_bike_negPOIs
+
+  ###traveltime
+  carptime = s_timecarp * short_car_time; walkdist = s_distwalk *logwalkdist; bikedist = s_distbike * logbikedist; ptwalktime = s_timept * pt_totalTravelTime
+
   ### List of utilities: these must use the same names as in mnl_settings, order is irrelevant
   V = list()
   V[['card']]  = 0  
-  V[['carp']]  = cons_carp + age2_carp + age4_carp + age5_carp + age6_carp + age7_carp + female_carp + inc1_carp + inc2_carp + inc3_carp + inc4_carp + inc6_carp+
-    carsno_carp + bikesno_carp + worktype2_carp + worktype4_carp + carpcost + carptime
-  V[['walk']]  = cons_walk + age2_walk + age4_walk + age5_walk + age6_walk + age7_walk + female_walk +inc1_walk + inc2_walk + inc3_walk + inc4_walk + inc6_walk +
-    carsno_walk + bikesno_walk + worktype2_walk + worktype4_walk + vgvi_walk + shannon_walk +crime_walk +attract_walk + stresjct_walk + poi_walk + walkcost + walktime
-  V[['bike']] = cons_bike + age2_bike + age4_bike + age5_bike + age6_bike + age7_bike +female_bike + inc1_bike + inc2_bike + inc3_bike + inc4_bike +inc6_bike +
-    carsno_bike + bikesno_bike + worktype2_bike + worktype4_bike + vgvi_bike + shannon_bike + crime_bike + attract_bike + stresjct_bike + poi_bike + bikecost + biketime
-  V[['ptwalk']] = cons_ptwalk + age2_ptwalk + age4_ptwalk + age5_ptwalk + age6_ptwalk + age7_ptwalk + female_ptwalk + inc1_ptwalk + inc2_ptwalk + inc3_ptwalk + 
-    inc4_ptwalk + inc6_ptwalk + carsno_ptwalk + bikesno_ptwalk + worktype2_ptwalk + worktype4_ptwalk + ptwalkcost + ptwalktime
+  V[['carp']]  = cons_carp + age2_carp + age4_carp + age5_carp + age6_carp + female_carp + inc1_carp + inc2_carp + inc3_carp + inc4_carp + inc6_carp+
+    carsno_carp + bikesno_carp + worktype2_carp + worktype4_carp + carptime 
+  V[['walk']]  = cons_walk + age2_walk + age4_walk + age5_walk + age6_walk + female_walk +inc1_walk + inc2_walk + inc3_walk + inc4_walk + inc6_walk +
+    carsno_walk + bikesno_walk + worktype2_walk + worktype4_walk + stresjct_walk + light_walk + vgvi_walk + shannon_walk + crime_walk + walkdist 
+  V[['bike']] = cons_bike + age2_bike + age4_bike + age5_bike + age6_bike + female_bike + inc1_bike + inc2_bike + inc3_bike + inc4_bike +inc6_bike +
+    carsno_bike + bikesno_bike + worktype2_bike + worktype4_bike + streslnk_bike + light_bike + vgvi_bike + shannon_bike + crime_bike + bikedist 
+  V[['ptwalk']] = cons_ptwalk + age2_ptwalk + age4_ptwalk + age5_ptwalk + age6_ptwalk + female_ptwalk + inc1_ptwalk + inc2_ptwalk + inc3_ptwalk + 
+    inc4_ptwalk + inc6_ptwalk + carsno_ptwalk + bikesno_ptwalk + worktype2_ptwalk + worktype4_ptwalk + ptwalktime 
   
    ### Define settings for MNL model component
   mnl_settings = list(
@@ -193,7 +201,7 @@ forecast = apollo_prediction(modelmnl,
                              apollo_inputs,
                              prediction_settings)  
 
-write.csv(forecast,file = "C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/forcastmnl.csv")
+write.csv(forecast,file = "result/Manchester/mandatory/Version2/forcastmnl.csv")
 
 #### Likelihood ratio tests against MNL model
 # ################################################################# #
@@ -227,7 +235,7 @@ estimateValues <- paste(round(modelmnl_estimates,3),"[",round(modelmnl_tTest,3),
 # estimateValues[model_estimates == 0] <- NA
 
 #exporting estimatesvalues to csv
-write.csv(estimateValues,file = "C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Manchester/estimatevalues_modelmnl.csv")
+write.csv(estimateValues,file = "result/Manchester/mandatory/Version2/estimatevalues_modelmnl.csv")
 
 names(estimateValues) = names(apollo_beta)
 
