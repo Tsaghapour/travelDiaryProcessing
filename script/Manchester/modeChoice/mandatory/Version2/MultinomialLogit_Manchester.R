@@ -92,9 +92,6 @@ apollo_beta =c(cons_carp = 0, cons_walk = 0, cons_bike = 0, cons_ptwalk = 0,
 ### Vector with names (in quotes) of parameters to be kept fixed at their starting value in apollo_beta, use apollo_beta_fixed = c() if none
 apollo_fixed = c()
 
-### Read in starting values for cons only model output file
-#apollo_beta=apollo_readBeta(apollo_beta,apollo_fixed,"C:/Users/e18933/OneDrive - RMIT University/WORK/JIBE/DATA Analysis/R/Apollo/MNL_Model",overwriteFixed=FALSE)
-
 #### GROUP AND VALIDATE INPUTS
 apollo_inputs = apollo_validateInputs()
 
