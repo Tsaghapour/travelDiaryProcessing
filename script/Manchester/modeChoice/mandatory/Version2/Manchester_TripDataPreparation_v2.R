@@ -16,7 +16,7 @@ list2env(trads, globalenv())
 trips <- trips
 route_short <- read.csv("data/manchester/AllShort92.csv", header = T)
 route_fast <- read.csv("data/manchester/AllFast92.csv", header = T)
-updatedpt <- read.csv("data/manchester/OtpPtDataManchester.csv", header = T)
+updatedpt <- read.csv("data/manchester/ptIndicators.csv", header = T)
 
 ## renaming columns
 names(route_short)[names(route_short) == "IDNumber"] <- "hh.id"
@@ -157,6 +157,17 @@ trips_hh_p$mainmode[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_bus=="TRUE"|trip
 trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
 trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
 
+#replacing NAs in time and cost variables with 0
+trips_hh_p$short_car_time[is.na(trips_hh_p$short_car_time)] = 0
+trips_hh_p$fast_car_time[is.na(trips_hh_p$fast_car_time)] = 0
+trips_hh_p$short_walk_dist[is.na(trips_hh_p$short_walk_dist)] = 0
+trips_hh_p$fast_walk_time[is.na(trips_hh_p$fast_walk_time)] = 0
+trips_hh_p$short_bike_dist[is.na(trips_hh_p$short_bike_dist)] = 0
+trips_hh_p$fast_bike_time[is.na(trips_hh_p$fast_bike_time)] = 0
+trips_hh_p$pt_totalTravelTime[is.na(trips_hh_p$pt_totalTravelTime)] = 0
+
+#trips$mainmode <- factor(trips$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
+
 #generating availability of modes
 trips_hh_p$availcard <- 1
 trips_hh_p$availcard[trips_hh_p$carsno == 0] = 0
@@ -174,18 +185,8 @@ trips_hh_p$availbike[trips_hh_p$troutebike_short_time == 0] = 0
 trips_hh_p$availbike[trips_hh_p$mainmode == 4] = 1
 trips_hh_p$availpt <- 1
 trips_hh_p$availpt[trips_hh_p$otptransit_time == 0] = 0
+trips_hh_p$availpt[trips_hh_p$pt_totalTravelTime_time == 0] = 0
 trips_hh_p$availpt[trips_hh_p$mainmode == 5] = 1
-
-#replacing NAs in time and cost variables with 0
-trips_hh_p$short_car_time[is.na(trips_hh_p$short_car_time)] = 0
-trips_hh_p$fast_car_time[is.na(trips_hh_p$fast_car_time)] = 0
-trips_hh_p$short_walk_dist[is.na(trips_hh_p$short_walk_dist)] = 0
-trips_hh_p$fast_walk_time[is.na(trips_hh_p$fast_walk_time)] = 0
-trips_hh_p$short_bike_dist[is.na(trips_hh_p$short_bike_dist)] = 0
-trips_hh_p$fast_bike_time[is.na(trips_hh_p$fast_bike_time)] = 0
-trips_hh_p$pt_totalTravelTime[is.na(trips_hh_p$otptotalpt_time)] = 0
-
-#trips$mainmode <- factor(trips$mainmode, levels = c(1,2,3,4,5),labels = c("card", "carp", "walk","bike","ptwalk"))
 
 ### creating binary variables for walking and cycling 
 trips_hh_p$walking <- 0
