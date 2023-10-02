@@ -148,14 +148,23 @@ trips_hh_p$vgvi_day[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 1
 trips_hh_p$light_night = 1
 trips_hh_p$light_night[6<=trips_hh_p$hours & trips_hh_p$hours<=20] = 0
 
-#generating mainmode 
-trips_hh_p$mainmode[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
-trips_hh_p$mainmode[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
-trips_hh_p$mainmode[trips_hh_p$t.m_walk=="TRUE"] = 3
-trips_hh_p$mainmode[trips_hh_p$t.m_cycle=="TRUE"] = 4
-trips_hh_p$mainmode[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_bus=="TRUE"|trips_hh_p$t.m_metrolink=="TRUE"] = 5 
-trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Other"),]
+#generating mainmode (t.m.main) 
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Car or van driver"] = 1 
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Car or van passenger"|trips_hh_p$t.m_main=="Taxi, minicab"] = 2
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Walk"] = 3
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Bicycle"] = 4
+trips_hh_p$mainmode[trips_hh_p$t.m_main=="Train"|trips_hh_p$t.m_main=="Bus, minibus, coach"|trips_hh_p$t.m_main=="Metrolink"] = 5 
+trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Motorcycle, scooter, moped"),]
 trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode), ]
+
+#generating mainmode2 
+trips_hh_p$mainmode2[trips_hh_p$t.m_carDriver=="TRUE"] = 1 
+trips_hh_p$mainmode2[trips_hh_p$t.m_carPassenger=="TRUE"|trips_hh_p$t.m_taxi=="TRUE"] = 2
+trips_hh_p$mainmode2[trips_hh_p$t.m_walk=="TRUE"] = 3
+trips_hh_p$mainmode2[trips_hh_p$t.m_cycle=="TRUE"] = 4
+trips_hh_p$mainmode2[trips_hh_p$t.m_train=="TRUE"|trips_hh_p$t.m_bus=="TRUE"|trips_hh_p$t.m_metrolink=="TRUE"] = 5 
+trips_hh_p <- trips_hh_p[!(trips_hh_p$t.m_main=="Motorcycle, scooter, moped"),]
+trips_hh_p <- trips_hh_p[complete.cases(trips_hh_p$mainmode2), ]
 
 #replacing NAs in time and cost variables with 0
 trips_hh_p$short_car_time[is.na(trips_hh_p$short_car_time)] = 0
